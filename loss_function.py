@@ -244,3 +244,30 @@ class FocalLoss(nn.Module):
                 "Invalid reduction mode: {}".format(self.reduction)
             )
         return loss
+
+
+# https://github.com/andrijdavid/FocalLoss/blob/master/focalloss.py
+class FocalLoss2d(nn.modules.loss._WeightedLoss):
+
+    def __init__(self, gamma=2, size_average=None, ignore_index=-100,
+                 reduce=None, balance_param=1.0, weight=None):
+        super(FocalLoss2d, self).__init__(size_average, reduce)
+        self.gamma = gamma
+        self.size_average = size_average
+        self.ignore_index = ignore_index
+        self.balance_param = balance_param
+        self.weight = weight
+
+    def forward(self, input, target):
+        # inputs and targets are assumed to be BatchxClasses
+        assert len(input.shape) == len(target.shape)
+        assert input.size(0) == target.size(0)
+        weight = torch.autograd.Variable(self.weight)
+
+        # compute the negative likelyhood
+        logpt = - F.binary_cross_entropy_with_logits(input=input, target=target, reduction='none', weight=weight)
+        pt = torch.exp(logpt)
+        # compute the loss
+        focal_loss = -((1 - pt) ** self.gamma) * logpt
+        balanced_focal_loss = self.balance_param * focal_loss.mean()
+        return balanced_focal_loss
