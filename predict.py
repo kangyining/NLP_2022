@@ -35,21 +35,22 @@ model = MyModel(model_path=MODEL_TYPE)
 model.load_state_dict(torch.load('./best_model_state.bin'))
 model = model.to(device)
 
-pred, pred2 = trainer.pridict(model, test_data_loader, device)
+pred, logits = trainer.pridict(model, test_data_loader, device)
 print(pred)
 print(len(pred))
 print(Counter(pred))
 # print(pred2)
-pred2 = np.array(pred2)
-print(pred2.max())
-for i in range(len(pred2)):
-    if pred[i] == 0:
-        pred2[i] = [0, 0, 0, 0, 0, 0, 0]
-pred2 = pred2 > 0.2
-pred2 = pred2.astype(int)
+# pred2 = np.array(pred2)
+# print(pred2.max())
+# for i in range(len(pred2)):
+#     if pred[i] == 0:
+#         pred2[i] = [0, 0, 0, 0, 0, 0, 0]
+# pred2 = pred2 > 0.2
+# pred2 = pred2.astype(int)
 labels2file([[k] for k in pred], 'task1.txt')
-labels2file(pred2, 'task2.txt')
+labels2file([k for k in logits], 'logits1.txt')
+# labels2file(pred2, 'task2.txt')
 z = zipfile.ZipFile('submission.zip', 'w', zipfile.ZIP_DEFLATED)
 z.write('task1.txt')
-z.write('task2.txt')
+# z.write('task2.txt')
 z.close()

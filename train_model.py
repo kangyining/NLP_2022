@@ -51,6 +51,9 @@ if __name__ == '__main__':
     # load_data
     train_data = pd.read_csv("./data/training_set.csv")
     train_data.label = train_data.label.apply(literal_eval)
+    # back_trans_train_data = pd.read_csv('./data/pseudo_text')
+    # back_trans_train_data.label = back_trans_train_data.label.apply(literal_eval)
+    # train_data = pd.concat([train_data, back_trans_train_data])
     test_data = pd.read_csv("./data/test_set.csv")
     test_data.label = test_data.label.apply(literal_eval)
 
@@ -58,12 +61,13 @@ if __name__ == '__main__':
     target = [i[0] for i in target]
     class_sample_count = np.array([len(np.where(target == t)[0]) for t in np.unique(target)])
     print(class_sample_count)
-    class_sample_count[0] += 2000
+    # class_sample_count[0] += 2000
     weight = 1. / class_sample_count
     samples_weight = np.array([weight[t] for t in target])
     samples_weight = torch.from_numpy(samples_weight)
     samples_weight = samples_weight.double()
     sampler = WeightedRandomSampler(samples_weight, int(len(samples_weight)/4), replacement=False)
+    print(int(len(samples_weight)/4))
     # all_negs = train_data[train_data.label.apply(lambda x: sum(x) == 0)]
     # all_pos = train_data[train_data.label.apply(lambda x: sum(x) > 0)]
     # training_set2 = pd.concat([all_pos, all_negs[:round(len(all_pos) * 0.5)]])
