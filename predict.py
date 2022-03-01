@@ -4,8 +4,10 @@ import zipfile
 import numpy as np
 import torch
 import pandas as pd
+from ast import literal_eval
 
-from models import MyModel
+import loss_function
+from models import MyModel, Bert_Lstm_Gru, Bert_last2cls, Bert_pooler, Bert_lastClsSep, Bert_all_layer
 import trainer
 from data_processing import create_data_loader
 
@@ -25,17 +27,33 @@ def labels2file(p, outf_path, task2=False):
                 outf.write(out+'\n')
 
 
-MODEL_TYPE = 'roberta-large'
+MODEL_TYPE = 'microsoft/deberta-v3-large'
 
 test_data = pd.read_csv("./data/final_test_set.csv")
-test_data_loader = create_data_loader(test_data, False, MODEL_TYPE, 512, 8)
+val_data = pd.read_csv("./data/test_set.csv")
 
-model = MyModel(model_path=MODEL_TYPE)
+# syno_train_data = pd.read_csv('./data/Synonym_data')
+# syno_train_data.label = syno_train_data.label.apply(literal_eval)
+# fr_trans_train_data = pd.read_csv('./data/fr_translate')
+# fr_trans_train_data.label = fr_trans_train_data.label.apply(literal_eval)
+# sp_trans_train_data = pd.read_csv('./data/sp_translate')
+# sp_trans_train_data.label = sp_trans_train_data.label.apply(literal_eval)
+# de_fr_trans_train_data = pd.read_csv('./data/de_fr_translate')
+# de_fr_trans_train_data.label = de_fr_trans_train_data.label.apply(literal_eval)
+# train_data = pd.concat([sp_trans_train_data,syno_train_data, fr_trans_train_data, de_fr_trans_train_data])
+# print(len(train_data))
+test_data_loader = create_data_loader(test_data, False, MODEL_TYPE, 512, 8)
+# val_data_loader = create_data_loader(val_data, True, MODEL_TYPE, 512, 8)
+
+model = Bert_lastClsSep(model_path=MODEL_TYPE, with_pooler=False)
 # model.load_state_dict(torch.load('./best_model_state.bin'))
-model.load_state_dict(torch.load('./best_model_state.bin'))
+model.load_state_dict(torch.load('./13.bin'))
 model = model.to(device)
 
 pred, logits = trainer.pridict(model, test_data_loader, device)
+# loss_fn = []
+# loss_fn.append((1, loss_function.DiceLoss(alpha=0.3).to(device)))
+# pred, logits = trainer.evaluate(model, val_data_loader, device, loss_fn, None)
 print(pred)
 print(len(pred))
 print(Counter(pred))
