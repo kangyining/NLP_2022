@@ -23,8 +23,6 @@ from data_processing import create_data_loader
 torch.cuda.current_device()
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-from models import MyModel
-
 # -----------load train and val data------------------------------
 
 # train_data = pd.read_csv("./data/training_set.csv")

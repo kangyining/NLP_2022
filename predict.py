@@ -7,7 +7,7 @@ import pandas as pd
 from ast import literal_eval
 
 import loss_function
-from models import MyModel, Bert_Lstm_Gru, Bert_last2cls, Bert_pooler, Bert_lastClsSep, Bert_all_layer
+from models import Bert_Lstm_Gru, Bert_last2cls, Bert_pooler, Bert_lastClsSep, Bert_all_layer
 import trainer
 from data_processing import create_data_loader
 
@@ -30,8 +30,8 @@ def labels2file(p, outf_path, task2=False):
 MODEL_TYPE = 'microsoft/deberta-v3-large'
 
 test_data = pd.read_csv("./data/final_test_set.csv")
-val_data = pd.read_csv("./data/test_set.csv")
-
+val_data = pd.read_csv("./data/val_set.csv")
+val_data.label = val_data.label.apply(literal_eval)
 # syno_train_data = pd.read_csv('./data/Synonym_data')
 # syno_train_data.label = syno_train_data.label.apply(literal_eval)
 # fr_trans_train_data = pd.read_csv('./data/fr_translate')
@@ -42,18 +42,18 @@ val_data = pd.read_csv("./data/test_set.csv")
 # de_fr_trans_train_data.label = de_fr_trans_train_data.label.apply(literal_eval)
 # train_data = pd.concat([sp_trans_train_data,syno_train_data, fr_trans_train_data, de_fr_trans_train_data])
 # print(len(train_data))
-test_data_loader = create_data_loader(test_data, False, MODEL_TYPE, 512, 8)
-# val_data_loader = create_data_loader(val_data, True, MODEL_TYPE, 512, 8)
+test_data_loader = create_data_loader(test_data, False, MODEL_TYPE, 512, 32)
+val_data_loader = create_data_loader(val_data, True, MODEL_TYPE, 512, 32, sampler=None)
 
 model = Bert_lastClsSep(model_path=MODEL_TYPE, with_pooler=False)
-# model.load_state_dict(torch.load('./best_model_state.bin'))
-model.load_state_dict(torch.load('./13.bin'))
+model.load_state_dict(torch.load('./best_model_state.bin'))
+# model.load_state_dict(torch.load('./8.bin'))
 model = model.to(device)
 
 pred, logits = trainer.pridict(model, test_data_loader, device)
-# loss_fn = []
-# loss_fn.append((1, loss_function.DiceLoss(alpha=0.3).to(device)))
-# pred, logits = trainer.evaluate(model, val_data_loader, device, loss_fn, None)
+loss_fn = []
+loss_fn.append((1, loss_function.DiceLoss(alpha=0.5).to(device)))
+trainer.evaluate(model, val_data_loader, device, loss_fn)
 print(pred)
 print(len(pred))
 print(Counter(pred))

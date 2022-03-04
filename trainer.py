@@ -94,9 +94,10 @@ def train_epoch(
             for (weight, fn) in loss_fn:
                 mix_loss = mix_loss + weight * fn(output, targets[:, 0])
 
-            # kl_loss = SymKlCriterion(begin_logic, end_logic, alpha=0.5)
-            # total_kl_loss += kl_loss.item() * 3
-            # mix_loss = mix_loss + kl_loss * 3
+            if args.r_drop:
+                kl_loss = SymKlCriterion(begin_logic, end_logic, alpha=0.5)
+                total_kl_loss += kl_loss.item() * 3
+                mix_loss = mix_loss + kl_loss * 3
 
             total_loss += mix_loss.item()
 
@@ -126,7 +127,8 @@ def train_epoch(
             else:
                 mix_loss.backward()
 
-            # nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            if args.grad_clamp:
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             if args.ema:
                 ema.update()
@@ -149,7 +151,12 @@ def train_epoch(
             # Track the best accuracy
             if f1 > best_F1:
                 best_F1 = f1
-                torch.save(model.state_dict(), model_id+'best_model_state.bin')
+                if args.ema:
+                    ema.apply_shadow()
+                    torch.save(model.state_dict(), model_id+'best_model_state.bin')
+                    ema.restore()
+                else:
+                    torch.save(model.state_dict(), model_id + 'best_model_state.bin')
                 stop_time = 0
             else:
                 stop_time += 1
@@ -159,8 +166,6 @@ def train_epoch(
                     return
             print([epoch_i + 1, avg_train_loss,val_loss, f1])
 
-        if best_F1 >=0.61:
-            torch.save(model.state_dict(), str(epoch_i+1) + '.bin')
         print("\n")
         print(best_F1)
 

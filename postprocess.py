@@ -44,7 +44,7 @@ def label_filter(a,b):
 # -------------------------------end---------------------------------------
 
 # ----------------------voting--------------------------------
-esamble_dir = './ensamble/pre/'
+esamble_dir = './ensamble/f1/'
 files = os.listdir((esamble_dir))
 files.sort(reverse=True)
 print(files)
@@ -60,10 +60,24 @@ for i in range(0,4):
     label_list.append(tmp)
 label_list = np.array(label_list)
 mode_list = stats.mode(label_list,axis=0)[0].flatten()
+
+# major vote (The highest F1 will be the final judge)
 # mode_list = []
+# num = len(label_list)
 # for i in range(len(label_list[0])):
-#     tmp = 0
-#     tmp |= int(label_list[0,i]) | int(label_list[1,i]) | int(label_list[2,i]) |int(label_list[3,i])
-#     mode_list.append(tmp)
+#     ls = [int(x) for x in label_list[:, i]]
+#     s = sum(ls)
+#     if num%2==0:
+#         if s > num//2:
+#             mode_list.append(1)
+#         elif s < num//2:
+#             mode_list.append(0)
+#         else:
+#             mode_list.append(ls[0])
+#     else:
+#         if s>num//2:
+#             mode_list.append(1)
+#         else:
+#             mode_list.append(0)
 print(mode_list)
 labels2file([[k] for k in mode_list], 'task1.txt')
