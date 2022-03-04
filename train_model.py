@@ -27,23 +27,23 @@ parser.add_argument('--epochs', type=int, default=12, metavar='E',
                     help='number of epochs to train (default: 12)')
 parser.add_argument('--lr', type=float, default=5e-6, metavar='LR',
                     help='learning rate (default: 5e-6)')
-parser.add_argument('--seed', type=int, default=12, metavar='S',
-                    help='random seed (default: 12)')
+parser.add_argument('--seed', type=int, default=15, metavar='S',
+                    help='random seed (default: 15)')
 parser.add_argument('--model', type=str, default='microsoft/deberta-v3-large',
                     help='the name of pre-trained model using in experimrnt like roberta-large (default: microsoft/deberta-v3-large)')
-parser.add_argument('--model_output', type=str, default='lstm_gru',
+parser.add_argument('--model_output', type=str, default='cls_spe',
                     help='Choosing model output style: lstm_gru, cls_spe, all_layer, last_2_cls, base')
-parser.add_argument('--dice_fact', type=float, default=0.5,
+parser.add_argument('--dice_fact', type=float, default=0.3,
                     help='hyper_param for dice loss')
 parser.add_argument('--atk', type=str, default='',
                     help='Apply adversarial machine learning: select from FGM and SMART')
-parser.add_argument('--ema', type=ast.literal_eval, default=False,
+parser.add_argument('--ema', type=ast.literal_eval, default=True,
                     help="Apply Exponential Moving Average to improve robust ")
-parser.add_argument('--grad_clamp', type=ast.literal_eval, default=False,
+parser.add_argument('--grad_clamp', type=ast.literal_eval, default=True,
                     help="Apply gradients clamping")
-parser.add_argument('--r_drop', type=ast.literal_eval, default=False,
+parser.add_argument('--r_drop', type=ast.literal_eval, default=True,
                     help="Apply r_drop regularization")
-parser.add_argument('--sample_num', type=float, default=3,
+parser.add_argument('--sample_num', type=float, default=2.5,
                     help='the total sample of weighted sampling: 3 mean 3 * positive number')
 args = parser.parse_args()
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     train_data_loader = create_data_loader(train_data, True, args.model, MAX_LEN, args.batch_size, sampler=sampler, shuffle=False)
 
     # train_data_loader = create_data_loader(train_data, True, args.model, MAX_LEN, args.batch_size, shuffle=True)
-    val_data_loader = create_data_loader(val_data, True, args.model, MAX_LEN, args.batch_size*2, sampler=None)
+    val_data_loader = create_data_loader(val_data, True, args.model, MAX_LEN, args.batch_size, sampler=None)
 
     # print(len(train_data_loader), len(val_data_loader))
     if args.model_output == 'base':

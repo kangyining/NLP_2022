@@ -51,7 +51,7 @@ print(files)
 print(len(files))
 label_list = []
 
-for i in range(0,4):
+for i in range(0,2):
     tmp = []
     with open(esamble_dir + files[i]) as f:
         for line in f.readlines():
