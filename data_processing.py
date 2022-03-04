@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 import torch
 
+
 class DPMDataset(Dataset):
     def __init__(self, dataframe, with_label, tokenizer, max_len):
         self.reviews = dataframe.text.to_numpy()
@@ -26,8 +27,7 @@ class DPMDataset(Dataset):
             return_attention_mask=True,
             return_tensors='pt',
         )
-        # if len(encoding['input_ids'].flatten()) == 151:
-        #     print(review)
+
         if self.with_label:
             return {
                 'input_ids': encoding['input_ids'].flatten(),
